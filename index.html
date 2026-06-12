@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RBC Loan · Lump Sum Savings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2334;
+    --border: #2a3045;
+    --accent: #4ade80;
+    --accent-dim: rgba(74,222,128,0.10);
+    --accent-glow: rgba(74,222,128,0.2);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.10);
+    --yellow: #fbbf24;
+    --text: #e8ecf4;
+    --muted: #6b7494;
+    --label: #9ba3be;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 28px 16px 80px;
+  }
+
+  .wrap { max-width: 680px; margin: 0 auto; }
+
+  /* Header */
+  .hdr { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .hdr-eye { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--accent); text-transform:uppercase; margin-bottom:6px; }
+  .hdr h1 { font-size:24px; font-weight:600; letter-spacing:-.03em; }
+  .hdr p  { margin-top:5px; font-size:13px; color:var(--muted); }
+
+  /* Cards */
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .card-title { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:16px; }
+
+  /* Loan snapshot */
+  .snapshot { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media(max-width:460px){ .snapshot{grid-template-columns:1fr 1fr;} }
+  .snap-item { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; }
+  .snap-label { font-size:10px; color:var(--muted); margin-bottom:4px; }
+  .snap-val { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; }
+
+  .snap-input {
+    width:100%; background:transparent; border:none; border-bottom:1px dashed var(--border);
+    padding:2px 0; color:var(--text); font-family:'DM Mono',monospace; font-size:14px; font-weight:500;
+    outline:none; border-radius:0;
+  }
+  .snap-input:focus { border-bottom-color:var(--accent); color:var(--accent); }
+  .snap-item .input-wrap .pfx { font-size:14px; left:0; }
+  .snap-item .input-wrap input { padding-left:14px; }
+  .snap-select {
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+    border-bottom:1px dashed var(--border); padding:2px 0;
+  }
+  .snap-select:focus { border-bottom-color:var(--accent); color:var(--accent); }
+  .snap-select option { background:var(--surface2); color:var(--text); }
+
+  /* Lump sum input */
+  .lump-row { display:flex; align-items:center; gap:12px; }
+  .lump-row label { font-size:13px; color:var(--label); white-space:nowrap; }
+  .input-wrap { position:relative; flex:1; }
+  .input-wrap .pfx { position:absolute; left:11px; top:50%; transform:translateY(-50%); font-family:'DM Mono',monospace; font-size:13px; color:var(--muted); pointer-events:none; }
+  input[type=number] {
+    width:100%; background:var(--surface2); border:1px solid var(--border);
+    border-radius:8px; padding:10px 12px 10px 26px;
+    color:var(--text); font-family:'DM Mono',monospace; font-size:15px;
+    outline:none; transition:border-color .2s;
+    -moz-appearance:textfield;
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; }
+  input[type=number]:focus { border-color:var(--accent); }
+
+  /* Quick chips */
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .chip {
+    border:1px solid var(--border); background:var(--surface2); color:var(--label);
+    border-radius:99px; padding:5px 14px; font-size:12px; font-family:'DM Mono',monospace;
+    cursor:pointer; transition:all .15s;
+  }
+  .chip:hover, .chip.active { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+
+  /* Results */
+  .results-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  @media(max-width:480px){ .results-grid{grid-template-columns:1fr 1fr;} }
+
+  .stat { background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px; }
+  .stat.hi { background:var(--accent-dim); border-color:var(--accent); box-shadow:0 0 18px var(--accent-glow); }
+  .stat.bad { background:var(--red-dim); border-color:var(--red); }
+  .stat-lbl { font-size:10px; color:var(--muted); margin-bottom:5px; line-height:1.4; }
+  .stat-val { font-family:'DM Mono',monospace; font-size:20px; font-weight:500; letter-spacing:-.02em; }
+  .stat.hi .stat-val { color:var(--accent); }
+  .stat.bad .stat-val { color:var(--red); }
+  .stat-sub { font-size:10px; color:var(--muted); margin-top:3px; font-family:'DM Mono',monospace; }
+
+  /* Badge */
+  .badge {
+    display:inline-flex; align-items:center; gap:5px;
+    background:var(--accent-dim); border:1px solid var(--accent); color:var(--accent);
+    border-radius:99px; padding:4px 12px; font-size:12px; font-weight:600;
+    font-family:'DM Mono',monospace; margin-bottom:14px;
+  }
+
+  /* Bar */
+  .divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+  .bar-section { margin-top:4px; }
+  .bar-header { display:flex; justify-content:space-between; font-size:11px; color:var(--label); margin-bottom:7px; }
+  .bar-track { height:7px; background:var(--surface2); border-radius:99px; overflow:hidden; position:relative; }
+  .bar-fill-orig { position:absolute; left:0; height:100%; background:var(--red); border-radius:99px; transition:width .5s ease; }
+  .bar-fill-new  { position:absolute; left:0; top:0; height:100%; background:var(--accent); border-radius:99px; transition:width .5s ease; }
+  .legend { display:flex; gap:18px; margin-top:8px; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--label); font-family:'DM Mono',monospace; }
+  .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* Timeline */
+  .timeline { display:flex; border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:16px; }
+  .tl-col { flex:1; padding:13px; text-align:center; }
+  .tl-col:not(:last-child) { border-right:1px solid var(--border); }
+  .tl-col.new { background:var(--accent-dim); }
+  .tl-lbl { font-size:10px; color:var(--muted); margin-bottom:5px; }
+  .tl-date { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; }
+  .tl-col.new .tl-date { color:var(--accent); }
+  .tl-sub { font-size:10px; color:var(--muted); margin-top:3px; }
+
+  /* ROI line */
+  .roi { margin-top:14px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-size:12px; color:var(--label); line-height:1.6; }
+  .roi strong { color:var(--accent); font-family:'DM Mono',monospace; }
+
+  /* empty */
+  .empty { text-align:center; padding:28px; color:var(--muted); font-size:13px; }
+
+  /* note */
+  .note { font-size:11px; color:var(--muted); margin-top:10px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hdr">
+    <div class="hdr-eye">RBC Auto Loan · Biweekly</div>
+    <h1>Lump Sum Savings Calculator</h1>
+    <p>Based on your actual loan. Enter any extra amount to see exactly what you save.</p>
+  </div>
+
+  <!-- Loan Snapshot -->
+  <div class="card">
+    <div class="card-title">Your Current Loan <span style="float:right;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— tap any value to edit</span></div>
+    <div class="snapshot">
+      <div class="snap-item">
+        <div class="snap-label">Balance</div>
+        <div class="input-wrap"><span class="pfx">$</span>
+          <input type="number" id="balance" class="snap-input" value="18681.65" min="0" step="100" oninput="calculate()"/>
+        </div>
+      </div>
+      <div class="snap-item">
+        <div class="snap-label">Rate (nominal, annual)</div>
+        <div class="input-wrap"><span class="pfx" style="left:auto;right:11px">%</span>
+          <input type="number" id="rate" class="snap-input" style="padding-left:10px;padding-right:24px" value="6.79" min="0" max="30" step="0.01" oninput="calculate()"/>
+        </div>
+      </div>
+      <div class="snap-item">
+        <div class="snap-label">Biweekly Payment</div>
+        <div class="input-wrap"><span class="pfx">$</span>
+          <input type="number" id="payment" class="snap-input" value="319.66" min="0" step="1" oninput="calculate()"/>
+        </div>
+      </div>
+      <div class="snap-item">
+        <div class="snap-label">Compounding</div>
+        <select id="compounding" class="snap-input snap-select" onchange="calculate()">
+          <option value="12" selected>Monthly</option>
+          <option value="2">Semi-annual</option>
+          <option value="1">Annual</option>
+          <option value="26">Biweekly (each payment)</option>
+        </select>
+      </div>
+    </div>
+    <p class="note">Update these anytime your statement changes (rate adjustments, balance after payments, etc).</p>
+  </div>
+
+  <!-- Input -->
+  <div class="card">
+    <div class="card-title">Extra Payment</div>
+    <div class="lump-row">
+      <label>Lump sum to pay today</label>
+      <div class="input-wrap">
+        <span class="pfx">$</span>
+        <input type="number" id="lump" value="" placeholder="0" min="0" step="100" oninput="setChip(null);calculate()"/>
+      </div>
+    </div>
+    <div class="chips" id="chips">
+      <div class="chip" onclick="setChip(this,500)">$500</div>
+      <div class="chip" onclick="setChip(this,1000)">$1,000</div>
+      <div class="chip" onclick="setChip(this,2000)">$2,000</div>
+      <div class="chip" onclick="setChip(this,3000)">$3,000</div>
+      <div class="chip" onclick="setChip(this,5000)">$5,000</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="card" id="results-card">
+    <div class="card-title">Your Savings</div>
+    <div id="results-body"><div class="empty">Enter a lump sum above to see your savings.</div></div>
+  </div>
+
+</div>
+
+<script>
+  // Read current loan inputs and derive the biweekly periodic rate
+  function fmt(n) {
+    return '$' + Math.abs(n).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function getLoanParams() {
+    const nominalRate = (parseFloat(document.getElementById('rate').value) || 0) / 100;
+    const compFreq = parseFloat(document.getElementById('compounding').value) || 12;
+    const bwPayment = parseFloat(document.getElementById('payment').value) || 0;
+
+    let bwRate;
+    if (compFreq === 26) {
+      // compounding matches payment frequency exactly
+      bwRate = nominalRate / 26;
+    } else {
+      // convert nominal rate compounded `compFreq` times/yr -> equivalent biweekly rate
+      const periodicRate = nominalRate / compFreq;
+      bwRate = Math.pow(1 + periodicRate, compFreq/26) - 1;
+    }
+    return { bwRate, bwPayment };
+  }
+
+  function amortize(balance, bwRate, bwPayment) {
+    let b = balance;
+    let totalInterest = 0;
+    let payments = 0;
+    if (b <= 0) return { payments: 0, totalInterest: 0 };
+    if (bwPayment <= b * bwRate) return { payments: Infinity, totalInterest: Infinity };
+    while (b > 0.005 && payments < 1000) {
+      const interest = b * bwRate;
+      totalInterest += interest;
+      b = b + interest - bwPayment;
+      if (b < 0) b = 0;
+      payments++;
+    }
+    return { payments, totalInterest };
+  }
+
+  function payoffDate(biweeklyPayments) {
+    if (!isFinite(biweeklyPayments)) return '—';
+    const d = new Date();
+    d.setDate(d.getDate() + biweeklyPayments * 14);
+    return d.toLocaleDateString('en-CA',{month:'short',year:'numeric'});
+  }
+
+  function setChip(el, val) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    if (el) {
+      el.classList.add('active');
+      document.getElementById('lump').value = val;
+    }
+    calculate();
+  }
+
+  function calculate() {
+    const balance = parseFloat(document.getElementById('balance').value) || 0;
+    const lump = parseFloat(document.getElementById('lump').value) || 0;
+    const { bwRate, bwPayment } = getLoanParams();
+
+    const orig = amortize(balance, bwRate, bwPayment);
+    const newBal = Math.max(0, balance - lump);
+    const withLump = amortize(newBal, bwRate, bwPayment);
+
+    const body = document.getElementById('results-body');
+
+    if (!isFinite(orig.payments)) {
+      body.innerHTML = `<div class="empty">⚠️ Your biweekly payment doesn't cover the interest at this rate — the loan would never pay down. Check your rate and payment values.</div>`;
+      return;
+    }
+
+    const saved = orig.totalInterest - withLump.totalInterest;
+    const monthsSaved = Math.round((orig.payments - withLump.payments) * 14 / 30.44);
+    const ratio = orig.totalInterest > 0 ? withLump.totalInterest / orig.totalInterest : 1;
+
+    if (lump <= 0) {
+      body.innerHTML = `
+        <div class="results-grid" style="margin-bottom:0">
+          <div class="stat bad">
+            <div class="stat-lbl">Interest remaining<br>(no extra payment)</div>
+            <div class="stat-val">${fmt(orig.totalInterest)}</div>
+            <div class="stat-sub">${orig.payments} payments left</div>
+          </div>
+          <div class="stat">
+            <div class="stat-lbl">Payoff date</div>
+            <div class="stat-val" style="font-size:16px">${payoffDate(orig.payments)}</div>
+            <div class="stat-sub">${Math.round(orig.payments*14/30.44)} months from now</div>
+          </div>
+          <div class="stat">
+            <div class="stat-lbl">Biweekly rate</div>
+            <div class="stat-val" style="font-size:16px">${(bwRate*100).toFixed(4)}%</div>
+            <div class="stat-sub">${document.getElementById('compounding').options[document.getElementById('compounding').selectedIndex].text.toLowerCase()} compounding</div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:14px">Enter a lump sum or tap a quick amount above.</p>
+      `;
+      return;
+    }
+
+    if (lump >= balance) {
+      body.innerHTML = `<div class="empty">That would pay off the loan entirely — you'd save ${fmt(orig.totalInterest)} in remaining interest! 🎉</div>`;
+      return;
+    }
+
+    // ROI: for every $1 paid, you save X cents in interest
+    const roi = saved / lump;
+
+    body.innerHTML = `
+      ${monthsSaved > 0 ? `<div class="badge">⚡ ${monthsSaved} month${monthsSaved !== 1 ? 's' : ''} sooner</div>` : ''}
+      <div class="results-grid">
+        <div class="stat hi">
+          <div class="stat-lbl">Interest saved</div>
+          <div class="stat-val">${fmt(saved)}</div>
+          <div class="stat-sub">by paying ${fmt(lump)} today</div>
+        </div>
+        <div class="stat bad">
+          <div class="stat-lbl">Without lump sum</div>
+          <div class="stat-val">${fmt(orig.totalInterest)}</div>
+          <div class="stat-sub">${orig.payments} payments · ${payoffDate(orig.payments)}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">With lump sum</div>
+          <div class="stat-val" style="color:var(--accent)">${fmt(withLump.totalInterest)}</div>
+          <div class="stat-sub">${withLump.payments} payments · ${payoffDate(withLump.payments)}</div>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+
+      <div class="bar-section">
+        <div class="bar-header">
+          <span>Interest reduction</span>
+          <span style="color:var(--accent)">${(100 - ratio*100).toFixed(1)}% less interest</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill-orig" style="width:100%"></div>
+          <div class="bar-fill-new" style="width:${(ratio*100).toFixed(1)}%"></div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="dot" style="background:var(--red)"></div> Original: ${fmt(orig.totalInterest)}</div>
+          <div class="legend-item"><div class="dot" style="background:var(--accent)"></div> New: ${fmt(withLump.totalInterest)}</div>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-col">
+          <div class="tl-lbl">Original payoff</div>
+          <div class="tl-date">${payoffDate(orig.payments)}</div>
+          <div class="tl-sub">${orig.payments} payments</div>
+        </div>
+        <div class="tl-col new">
+          <div class="tl-lbl">New payoff date</div>
+          <div class="tl-date">${payoffDate(withLump.payments)}</div>
+          <div class="tl-sub">${withLump.payments} payments</div>
+        </div>
+        <div class="tl-col">
+          <div class="tl-lbl">New balance after</div>
+          <div class="tl-date">${fmt(newBal)}</div>
+          <div class="tl-sub">remaining</div>
+        </div>
+      </div>
+
+      <div class="roi">
+        For every <strong>$1</strong> you pay today, you save <strong>${(roi*100).toFixed(1)}¢</strong> in interest — 
+        a guaranteed <strong>${(roi*100).toFixed(1)}%</strong> return on that money.
+        ${roi > 0.06 ? ' That beats most savings accounts right now.' : ''}
+      </div>
+    `;
+  }
+
+  // Run on load to show base state
+  calculate();
+</script>
+</body>
+</html>
