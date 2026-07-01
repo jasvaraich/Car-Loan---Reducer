@@ -384,10 +384,17 @@
         a guaranteed <strong>${(roi*100).toFixed(1)}%</strong> return on that money.
         ${roi > 0.06 ? ' That beats most savings accounts right now.' : ''}
      </div>
-      <div class="roi">
-      This product is free for only select people. To help support this product, 
-      funds can be e-transferred to <a href="mailto:jasvaraich@gmail.com?subject=Support for Car Loan Reducer">jasvaraich@gmail.com</a>
-      </div>
+     <div class="roi">
+  This product is free for only select people. To help support this product, 
+  funds can be e-transferred to 
+  <strong style="color:var(--accent);font-family:'DM Mono',monospace;">jasvaraich@gmail.com</strong>
+  <button onclick="navigator.clipboard.writeText('jasvaraich@gmail.com').then(()=>{this.textContent='✓ Copied';setTimeout(()=>this.textContent='Copy',2000)})" 
+    style="margin-left:8px;background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);
+    border-radius:6px;padding:3px 10px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;">
+    Copy
+  </button>
+</div>
+
 
     `;
   }
